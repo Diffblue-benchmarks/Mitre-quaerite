@@ -1,0 +1,450 @@
+buildCmd: mvn -e -X -Dmaven.test.skip=true compile
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+# Target TGF: 520.357142857
+#  >methods=10
+#  >complexity=507
+#  >construction=9.25
+#  >dependency=0.309523809524
+ - target:
+   - dir: quaerite-analysis/target/classes
+     file: org/mitre/quaerite/analysis/CompareAnalyzers.class
+     sourceDir: quaerite-analysis/src/main/java
+     sourceFile: org/mitre/quaerite/analysis/CompareAnalyzers.java
+   - dir: quaerite-connectors/target/classes
+     file: org/mitre/quaerite/connectors/SearchClient.class
+     sourceDir: quaerite-connectors/src/main/java
+     sourceFile: org/mitre/quaerite/connectors/SearchClient.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/util/CommandLineUtil.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/util/CommandLineUtil.java
+   - dir: quaerite-connectors/target/classes
+     file: org/mitre/quaerite/connectors/SearchClientFactory.class
+     sourceDir: quaerite-connectors/src/main/java
+     sourceFile: org/mitre/quaerite/connectors/SearchClientFactory.java
+   - dir: quaerite-analysis/target/classes
+     file: org/mitre/quaerite/analysis/CompareAnalyzers$QueryTokenPair.class
+     sourceDir: quaerite-analysis/src/main/java
+     sourceFile: org/mitre/quaerite/analysis/CompareAnalyzers.java
+   - dir: quaerite-analysis/target/classes
+     file: org/mitre/quaerite/analysis/CompareAnalyzers$ReAnalyzer.class
+     sourceDir: quaerite-analysis/src/main/java
+     sourceFile: org/mitre/quaerite/analysis/CompareAnalyzers.java
+   - dir: quaerite-analysis/target/classes
+     file: org/mitre/quaerite/analysis/CompareAnalyzers$TermGetter.class
+     sourceDir: quaerite-analysis/src/main/java
+     sourceFile: org/mitre/quaerite/analysis/CompareAnalyzers.java
+   - dir: quaerite-analysis/target/classes
+     file: org/mitre/quaerite/analysis/EquivalenceSet.class
+     sourceDir: quaerite-analysis/src/main/java
+     sourceFile: org/mitre/quaerite/analysis/EquivalenceSet.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/util/MapUtil.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/util/MapUtil.java
+# Target TGF: 303.0
+#  >methods=5
+#  >complexity=202
+#  >construction=9.0
+#  >dependency=0.166666666667
+ - target:
+   - dir: quaerite-cli/target/classes
+     file: org/mitre/quaerite/cli/RunExperiments.class
+     sourceDir: quaerite-cli/src/main/java
+     sourceFile: org/mitre/quaerite/cli/RunExperiments.java
+   - dir: quaerite-cli/target/classes
+     file: org/mitre/quaerite/cli/AbstractExperimentRunner.class
+     sourceDir: quaerite-cli/src/main/java
+     sourceFile: org/mitre/quaerite/cli/AbstractExperimentRunner.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/util/CommandLineUtil.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/util/CommandLineUtil.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/ExperimentSet.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/ExperimentSet.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/ExperimentConfig.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/ExperimentConfig.java
+   - dir: quaerite-cli/target/classes
+     file: org/mitre/quaerite/db/ExperimentDB.class
+     sourceDir: quaerite-cli/src/main/java
+     sourceFile: org/mitre/quaerite/db/ExperimentDB.java
+# Target TGF: 866.304761905
+#  >methods=47
+#  >complexity=2534
+#  >construction=38.8928571429
+#  >dependency=19.3166666667
+ - target:
+   - dir: quaerite-cli/target/classes
+     file: org/mitre/quaerite/db/ExperimentDB.class
+     sourceDir: quaerite-cli/src/main/java
+     sourceFile: org/mitre/quaerite/db/ExperimentDB.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/Judgments.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/Judgments.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/scoreaggregators/ScoreAggregator.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/scoreaggregators/ScoreAggregator.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/Experiment.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/Experiment.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/JudgmentList.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/JudgmentList.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/stats/ExperimentScorePair.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/stats/ExperimentScorePair.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/ExperimentSet.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/ExperimentSet.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/QueryInfo.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/QueryInfo.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/ExperimentConfig.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/ExperimentConfig.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/stats/ExperimentNameScorePair.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/stats/ExperimentNameScorePair.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/scoreaggregators/ScoreAggregatorListSerializer.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/scoreaggregators/ScoreAggregatorListSerializer.java
+# Target TGF: 837.0
+#  >methods=3
+#  >complexity=93
+#  >construction=9.0
+#  >dependency=1.0
+ - target:
+   - dir: quaerite-cli/target/classes
+     file: org/mitre/quaerite/cli/QuaeriteCLI.class
+     sourceDir: quaerite-cli/src/main/java
+     sourceFile: org/mitre/quaerite/cli/QuaeriteCLI.java
+   - dir: quaerite-cli/target/classes
+     file: org/mitre/quaerite/cli/DumpExperiments.class
+     sourceDir: quaerite-cli/src/main/java
+     sourceFile: org/mitre/quaerite/cli/DumpExperiments.java
+   - dir: quaerite-cli/target/classes
+     file: org/mitre/quaerite/cli/RunGA.class
+     sourceDir: quaerite-cli/src/main/java
+     sourceFile: org/mitre/quaerite/cli/RunGA.java
+   - dir: quaerite-cli/target/classes
+     file: org/mitre/quaerite/cli/FindFeatures.class
+     sourceDir: quaerite-cli/src/main/java
+     sourceFile: org/mitre/quaerite/cli/FindFeatures.java
+   - dir: quaerite-cli/target/classes
+     file: org/mitre/quaerite/cli/RunExperiments.class
+     sourceDir: quaerite-cli/src/main/java
+     sourceFile: org/mitre/quaerite/cli/RunExperiments.java
+   - dir: quaerite-cli/target/classes
+     file: org/mitre/quaerite/cli/GenerateExperiments.class
+     sourceDir: quaerite-cli/src/main/java
+     sourceFile: org/mitre/quaerite/cli/GenerateExperiments.java
+   - dir: quaerite-cli/target/classes
+     file: org/mitre/quaerite/cli/DumpResults.class
+     sourceDir: quaerite-cli/src/main/java
+     sourceFile: org/mitre/quaerite/cli/DumpResults.java
+# Target TGF: 774.0
+#  >methods=3
+#  >complexity=86
+#  >construction=18.0
+#  >dependency=2.0
+ - target:
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/util/MapUtil.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/util/MapUtil.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/util/MapUtil$2.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/util/MapUtil.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/util/MapUtil$1.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/util/MapUtil.java
+# Target TGF: 298.607142857
+#  >methods=6
+#  >complexity=424
+#  >construction=3.53571428571
+#  >dependency=1.2
+ - target:
+   - dir: quaerite-cli/target/classes
+     file: org/mitre/quaerite/cli/AbstractCLI.class
+     sourceDir: quaerite-cli/src/main/java
+     sourceFile: org/mitre/quaerite/cli/AbstractCLI.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/Judgments.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/Judgments.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/ExperimentSet.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/ExperimentSet.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/QueryStrings.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/QueryStrings.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/QueryInfo.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/QueryInfo.java
+   - dir: quaerite-cli/target/classes
+     file: org/mitre/quaerite/db/ExperimentDB.class
+     sourceDir: quaerite-cli/src/main/java
+     sourceFile: org/mitre/quaerite/db/ExperimentDB.java
+# Target TGF: 2854.92857143
+#  >methods=11
+#  >complexity=421
+#  >construction=48.5357142857
+#  >dependency=5.5
+ - target:
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/util/MathUtil.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/util/MathUtil.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/GAConfig.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/GAConfig.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/stats/ExperimentScorePair.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/stats/ExperimentScorePair.java
+# Target TGF: 294.5
+#  >methods=8
+#  >complexity=248
+#  >construction=12.5
+#  >dependency=1.75
+ - target:
+   - dir: quaerite-solr-tools/target/classes
+     file: org/mitre/quaerite/solrtools/ElevateScraper.class
+     sourceDir: quaerite-solr-tools/src/main/java
+     sourceFile: org/mitre/quaerite/solrtools/ElevateScraper.java
+   - dir: quaerite-solr-tools/target/classes
+     file: org/mitre/quaerite/solrtools/Elevate.class
+     sourceDir: quaerite-solr-tools/src/main/java
+     sourceFile: org/mitre/quaerite/solrtools/Elevate.java
+# Target TGF: 769.5
+#  >methods=13
+#  >complexity=171
+#  >construction=9.0
+#  >dependency=0.5
+ - target:
+   - dir: quaerite-examples/target/classes
+     file: org/mitre/quaerite/examples/IndexTMDB.class
+     sourceDir: quaerite-examples/src/main/java
+     sourceFile: org/mitre/quaerite/examples/IndexTMDB.java
+   - dir: quaerite-connectors/target/classes
+     file: org/mitre/quaerite/connectors/SearchClient.class
+     sourceDir: quaerite-connectors/src/main/java
+     sourceFile: org/mitre/quaerite/connectors/SearchClient.java
+   - dir: quaerite-examples/target/classes
+     file: org/mitre/quaerite/examples/IndexTMDB$Movie.class
+     sourceDir: quaerite-examples/src/main/java
+     sourceFile: org/mitre/quaerite/examples/IndexTMDB.java
+   - dir: quaerite-connectors/target/classes
+     file: org/mitre/quaerite/connectors/SearchClientFactory.class
+     sourceDir: quaerite-connectors/src/main/java
+     sourceFile: org/mitre/quaerite/connectors/SearchClientFactory.java
+   - dir: quaerite-connectors/target/classes
+     file: org/mitre/quaerite/connectors/StoredDocument.class
+     sourceDir: quaerite-connectors/src/main/java
+     sourceFile: org/mitre/quaerite/connectors/StoredDocument.java
+# Target TGF: 393.75
+#  >methods=3
+#  >complexity=175
+#  >construction=9.0
+#  >dependency=0.25
+ - target:
+   - dir: quaerite-cli/target/classes
+     file: org/mitre/quaerite/cli/DumpResults.class
+     sourceDir: quaerite-cli/src/main/java
+     sourceFile: org/mitre/quaerite/cli/DumpResults.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/scoreaggregators/ScoreAggregator.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/scoreaggregators/ScoreAggregator.java
+   - dir: quaerite-cli/target/classes
+     file: org/mitre/quaerite/cli/AbstractExperimentRunner.class
+     sourceDir: quaerite-cli/src/main/java
+     sourceFile: org/mitre/quaerite/cli/AbstractExperimentRunner.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/ExperimentSet.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/ExperimentSet.java
+   - dir: quaerite-core/target/classes
+     file: org/mitre/quaerite/core/ExperimentConfig.class
+     sourceDir: quaerite-core/src/main/java
+     sourceFile: org/mitre/quaerite/core/ExperimentConfig.java
+   - dir: quaerite-cli/target/classes
+     file: org/mitre/quaerite/db/ExperimentDB.class
+     sourceDir: quaerite-cli/src/main/java
+     sourceFile: org/mitre/quaerite/db/ExperimentDB.java
